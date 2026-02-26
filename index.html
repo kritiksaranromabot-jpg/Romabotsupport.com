@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roma Support - Report System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #1a1a1a; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .roblox-card { background: #2a2a2a; border-radius: 8px; border: 1px solid #444; }
+        .btn-roblox { background: #00b06f; transition: 0.3s; }
+        .btn-roblox:hover { background: #008a57; }
+        #loginOverlay { background: rgba(0,0,0,0.9); z-index: 100; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div id="loginOverlay" class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-[#2a2a2a] p-8 rounded-lg shadow-2xl border border-gray-600 w-full max-w-sm text-center">
+            <i class="fas fa-shield-halved text-5xl text-blue-500 mb-4"></i>
+            <h2 class="text-xl font-bold mb-4">SYSTEM ACCESS</h2>
+            <input type="password" id="pwdInput" placeholder="Masukkan Password" 
+                   class="w-full p-2 rounded bg-black border border-gray-500 mb-4 text-center focus:outline-none focus:border-blue-500">
+            <button onclick="checkPass()" class="w-full py-2 bg-blue-600 rounded font-bold hover:bg-blue-700">UNLOCK</button>
+            <p id="errMsg" class="text-red-500 mt-2 text-sm hidden">Password Salah!</p>
+        </div>
+    </div>
+
+    <div id="mainUI" class="max-w-4xl mx-auto hidden">
+        
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-black italic tracking-tighter">ROMA <span class="text-blue-500">SUPPORT</span></h1>
+                <p class="text-gray-400 text-sm">Bantu kami memperbaiki sistem Bot MM2</p>
+            </div>
+            <div class="bg-blue-500 p-3 rounded-xl shadow-lg shadow-blue-500/20">
+                <i class="fas fa-bug text-3xl text-white"></i>
+            </div>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 space-y-4">
+                <div class="roblox-card p-5">
+                    <h3 class="font-bold text-blue-400 mb-2"><i class="fas fa-info-circle mr-2"></i>Panduan</h3>
+                    <ul class="text-sm text-gray-400 space-y-2">
+                        <li>• Sertakan nama user/nomer WA.</li>
+                        <li>• Jelaskan detail bug fiturnya.</li>
+                        <li>• Kritik pedas diperbolehkan asal membangun.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
+                <form id="reportForm" class="roblox-card p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-300">Tipe Laporan</label>
+                        <select id="type" class="w-full p-3 rounded bg-black border border-gray-600 focus:border-blue-500 outline-none">
+                            <option value="Bug Fitur">🐛 Bug / Error Fitur</option>
+                            <option value="Saran Fitur">💡 Saran Fitur Baru</option>
+                            <option value="Kritik Pelayanan">📢 Kritik / Aduan</option>
+                            <option value="Lainnya">❓ Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-300">Nama User / No. WhatsApp</label>
+                        <input type="text" id="username" placeholder="Contoh: Roma / 62857..." required
+                               class="w-full p-3 rounded bg-black border border-gray-600 focus:border-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-300">Deskripsi Masalah</label>
+                        <textarea id="message" rows="5" placeholder="Tuliskan laporanmu di sini Bos..." required
+                                  class="w-full p-3 rounded bg-black border border-gray-600 focus:border-blue-500 outline-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 btn-roblox text-white font-bold rounded-lg uppercase tracking-widest shadow-lg shadow-green-500/20">
+                        Kirim Laporan <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-600 text-xs">
+            &copy; 2026 Roma Master Bot System. Seluruh laporan masuk ke antrean database.
+        </footer>
+    </div>
+
+    <script>
+        //
