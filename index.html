@@ -3,185 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMA MASTER | SUPPORT CENTER</title>
+    <title>ROMA SUPPORT SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        
-        body { 
-            background-color: #0a0a0a; 
-            color: #e5e5e5; 
-            font-family: 'JetBrains Mono', monospace; 
-            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0a0a0a 100%);
-        }
-        .glass { background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .neon-border { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-        .status-dot { height: 8px; width: 8px; background-color: #00ff00; border-radius: 50%; display: inline-block; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        
-        input, select, textarea { 
-            background: #151515 !important; 
-            border: 1px solid #333 !important; 
-            transition: 0.3s;
-        }
-        input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        body { background: #0f0f0f; color: #eee; font-family: sans-serif; }
+        .glass { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; }
+        .admin-only { display: none; }
+        input, textarea, select { background: #000 !important; color: white !important; border: 1px solid #444 !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="p-4">
 
-    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <div class="glass p-8 rounded-2xl w-full max-w-sm text-center neon-border">
-            <div class="mb-6">
-                <i class="fas fa-lock text-blue-500 text-4xl mb-2"></i>
-                <h2 class="text-xl font-bold tracking-widest text-white">SYSTEM ENCRYPTED</h2>
-                <p class="text-xs text-gray-500">Access Required for Roma Master Support</p>
-            </div>
-            <input type="password" id="pwdInput" placeholder="ENTER ACCESS CODE" 
-                   class="w-full p-3 rounded-lg text-center mb-4 text-blue-400 font-bold tracking-[0.5em] outline-none">
-            <button onclick="checkPass()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-lg transition-all transform active:scale-95">
-                UNLOCK SYSTEM
-            </button>
-            <p id="errMsg" class="text-red-500 mt-4 text-xs hidden">❌ ACCESS DENIED: WRONG PASSWORD</p>
-        </div>
+    <div class="max-w-4xl mx-auto flex justify-between items-center mb-10 mt-5">
+        <h1 class="text-2xl font-black italic text-blue-500">ROMA <span class="text-white">SUPPORT</span></h1>
+        <button onclick="openAdmin()" class="bg-gray-800 p-2 px-4 rounded text-xs hover:bg-gray-700 transition">
+            <i class="fas fa-lock mr-2"></i>ADMIN PANEL
+        </button>
     </div>
 
-    <div id="mainUI" class="hidden p-4 md:p-8 flex-grow">
-        
-        <nav class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded shadow-lg">
-                    <i class="fas fa-headset text-white text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black italic text-white tracking-tighter uppercase">ROMA-MASTER <span class="text-blue-500">OPS</span></h1>
-                    <div class="text-[10px] flex items-center gap-1">
-                        <span class="status-dot"></span> <span class="text-gray-400 uppercase">System Operational v2.0</span>
-                    </div>
-                </div>
+    <div id="userPanel" class="max-w-2xl mx-auto glass p-8 shadow-2xl">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+            <i class="fas fa-bug text-red-500"></i> Kirim Laporan / Bug
+        </h2>
+        <form id="reportForm" class="space-y-4">
+            <div>
+                <label class="text-xs text-gray-500 uppercase font-bold">Nama / WhatsApp</label>
+                <input type="text" id="user" class="w-full p-3 rounded mt-1 outline-none" placeholder="Contoh: Roma / 628..." required>
             </div>
-            
-            <div class="text-right">
-                <div class="inline-block glass p-2 px-4 rounded-full border-blue-500/50">
-                    <span class="text-blue-500 font-bold text-sm">ID: <span id="ticketId">#RM-0000</span></span>
-                </div>
+            <div>
+                <label class="text-xs text-gray-500 uppercase font-bold">Tipe Masalah</label>
+                <select id="type" class="w-full p-3 rounded mt-1 outline-none">
+                    <option>Bug Database</option>
+                    <option>Saran Fitur</option>
+                    <option>Laporan User</option>
+                </select>
             </div>
-        </nav>
-
-        <main class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 space-y-6">
-                <div class="glass p-6 rounded-xl border-l-4 border-blue-600">
-                    <h3 class="text-blue-400 font-bold mb-4 uppercase text-sm italic">Status Laporan</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">Laporan Masuk Hari Ini</span>
-                            <span class="text-white">24</span>
-                        </div>
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">Average Response Time</span>
-                            <span class="text-white">~15 Menit</span>
-                        </div>
-                        <div class="w-full bg-gray-800 h-1 mt-2 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full w-[85%]"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass p-6 rounded-xl">
-                    <h3 class="text-white font-bold mb-3 text-sm">PENTING:</h3>
-                    <p class="text-[11px] text-gray-400 leading-relaxed">
-                        Gunakan sistem ini hanya untuk melaporkan bug krusial pada database MM2 atau error pada Bot Roma Master.
-                        Laporan spam akan berakibat nomor Anda di-ban permanen dari sistem database .banned.json!
-                    </p>
-                </div>
+            <div>
+                <label class="text-xs text-gray-500 uppercase font-bold">Deskripsi</label>
+                <textarea id="msg" class="w-full p-3 rounded mt-1 outline-none h-32" placeholder="Detail laporan..." required></textarea>
             </div>
+            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded font-black transition">
+                KIRIM SEKARANG
+            </button>
+        </form>
+    </div>
 
-            <div class="lg:col-span-8">
-                <form id="reportForm" class="glass p-8 rounded-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <i class="fas fa-file-invoice text-9xl"></i>
-                    </div>
+    <div id="adminPanel" class="max-w-5xl mx-auto admin-only">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-green-500 italic"><i class="fas fa-database mr-2"></i>DATA LAPORAN MASUK</h2>
+            <button onclick="closeAdmin()" class="text-red-500 font-bold">KELUAR</button>
+        </div>
 
-                    <div class="grid md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Tipe Masalah</label>
-                            <select id="type" class="w-full mt-1 p-3 rounded bg-black text-sm text-white focus:ring-1 ring-blue-500 outline-none">
-                                <option>Bug Database MM2</option>
-                                <option>Bot Tidak Merespon</option>
-                                <option>Saran Fitur Baru</option>
-                                <option>Laporan User Penipu</option>
-                                <option>Lainnya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Nama / Nomor WA</label>
-                            <input type="text" id="username" placeholder="Roma / 628..." required
-                                   class="w-full mt-1 p-3 rounded bg-black text-sm text-white outline-none">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase">Bukti Link (Opsional)</label>
-                        <input type="url" id="proofLink" placeholder="Link Screenshot / Video (Imgur/Gdrive)"
-                               class="w-full mt-1 p-3 rounded bg-black text-sm text-white outline-none">
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase">Detail Pesan</label>
-                        <textarea id="message" rows="6" placeholder="Jelaskan masalahnya Bos..." required
-                                  class="w-full mt-1 p-3 rounded bg-black text-sm text-white outline-none resize-none"></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-700 to-blue-500 text-white font-black rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-                        SUBMIT REPORT <i class="fas fa-chevron-right"></i>
-                    </button>
-                </form>
-            </div>
-        </main>
-
-        <footer class="mt-20 text-center">
-            <p class="text-[10px] text-gray-600 tracking-[0.3em] uppercase">Built for Roma Master Bot Management</p>
-        </footer>
+        <div class="glass overflow-hidden">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-blue-900/20 text-blue-400">
+                    <tr>
+                        <th class="p-4">WAKTU</th>
+                        <th class="p-4">PENGIRIM</th>
+                        <th class="p-4">TIPE</th>
+                        <th class="p-4">PESAN</th>
+                        <th class="p-4 text-center">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody id="reportList">
+                    </tbody>
+            </table>
+        </div>
+        <button onclick="clearData()" class="mt-4 text-xs text-gray-600 hover:text-red-500">Hapus Semua Data Laporan</button>
     </div>
 
     <script>
-        // Generate Random Ticket ID
-        document.getElementById('ticketId').innerText = `#RM-${Math.floor(Math.random() * 9000) + 1000}`;
+        // --- LOGIC DATABASE (Lokal di Browser) ---
+        let db = JSON.parse(localStorage.getItem('romaReports')) || [];
 
-        function checkPass() {
-            const pwd = document.getElementById('pwdInput').value;
-            if (pwd === "piala100") {
-                document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('mainUI').classList.remove('hidden');
+        // Simpan Laporan (User)
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newReport = {
+                id: Date.now(),
+                time: new Date().toLocaleString(),
+                user: document.getElementById('user').value,
+                type: document.getElementById('type').value,
+                msg: document.getElementById('msg').value
+            };
+            db.push(newReport);
+            localStorage.setItem('romaReports', JSON.stringify(db));
+            alert('✅ Laporan terkirim ke database Roma!');
+            this.reset();
+        });
+
+        // Buka Panel Admin dengan Password
+        function openAdmin() {
+            const pass = prompt("MASUKKAN PASSWORD OWNER:");
+            if (pass === "piala100") {
+                document.getElementById('userPanel').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('admin-only');
+                renderReports();
             } else {
-                document.getElementById('errMsg').classList.remove('hidden');
-                setTimeout(() => { document.getElementById('errMsg').classList.add('hidden'); }, 2000);
+                alert("❌ PASSWORD SALAH, TOLOL!");
             }
         }
 
-        document.getElementById('reportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const data = {
-                ticket: document.getElementById('ticketId').innerText,
-                type: document.getElementById('type').value,
-                user: document.getElementById('username').value,
-                proof: document.getElementById('proofLink').value || 'Tidak Ada Bukti',
-                msg: document.getElementById('message').value
-            };
+        // Tutup Panel
+        function closeAdmin() {
+            document.getElementById('adminPanel').classList.add('admin-only');
+            document.getElementById('userPanel').classList.remove('hidden');
+        }
 
-            // SIMULASI KIRIM DATA (Bisa disambung ke DISCORD WEBHOOK)
-            console.log("Data Terkirim:", data);
+        // Tampilkan Data ke Tabel
+        function renderReports() {
+            const list = document.getElementById('reportList');
+            list.innerHTML = '';
             
-            alert(`✅ REPORT SUBMITTED!\nTicket: ${data.ticket}\n\nLaporan sudah masuk ke sistem Roma Master. Harap tunggu pengecekan.`);
-            this.reset();
-            document.getElementById('ticketId').innerText = `#RM-${Math.floor(Math.random() * 9000) + 1000}`;
-        });
+            if (db.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-600">Belum ada laporan masuk.</td></tr>';
+                return;
+            }
 
-        document.getElementById('pwdInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkPass();
-        });
+            db.reverse().forEach((item, index) => {
+                list.innerHTML += `
+                    <tr class="border-t border-gray-800 hover:bg-white/5 transition">
+                        <td class="p-4 text-gray-500 text-[10px]">${item.time}</td>
+                        <td class="p-4 font-bold text-blue-400">${item.user}</td>
+                        <td class="p-4"><span class="bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-[10px] uppercase">${item.type}</span></td>
+                        <td class="p-4 text-gray-300">${item.msg}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="deleteSingle(${item.id})" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Hapus satu per satu
+        function deleteSingle(id) {
+            if(confirm('Hapus laporan ini?')) {
+                db = db.filter(item => item.id !== id);
+                localStorage.setItem('romaReports', JSON.stringify(db));
+                renderReports();
+            }
+        }
+
+        // Hapus Semua
+        function clearData() {
+            if(confirm('HAPUS SEMUA DATABASE?')) {
+                localStorage.removeItem('romaReports');
+                db = [];
+                renderReports();
+            }
+        }
     </script>
 </body>
 </html>
