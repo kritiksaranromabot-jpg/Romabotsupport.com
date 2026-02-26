@@ -3,155 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMA SUPPORT SYSTEM</title>
+    <title>ROMA MASTER OPS | SECURE REPORT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f0f0f; color: #eee; font-family: sans-serif; }
-        .glass { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; }
-        .admin-only { display: none; }
-        input, textarea, select { background: #000 !important; color: white !important; border: 1px solid #444 !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        body { background: #050505; color: #d1d1d1; font-family: 'Space Mono', monospace; }
+        .neon-box { border: 1px solid #222; transition: 0.3s; background: #0a0a0a; }
+        .neon-box:hover { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .admin-panel { display: none; }
+        input, textarea, select { background: #000 !important; color: #3b82f6 !important; border: 1px solid #222 !important; font-weight: bold; }
+        .badge-bug { background: #450a0a; color: #f87171; }
+        .badge-saran { background: #064e3b; color: #34d399; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10">
 
-    <div class="max-w-4xl mx-auto flex justify-between items-center mb-10 mt-5">
-        <h1 class="text-2xl font-black italic text-blue-500">ROMA <span class="text-white">SUPPORT</span></h1>
-        <button onclick="openAdmin()" class="bg-gray-800 p-2 px-4 rounded text-xs hover:bg-gray-700 transition">
-            <i class="fas fa-lock mr-2"></i>ADMIN PANEL
+    <div class="max-w-6xl mx-auto flex justify-between items-end mb-12 border-b border-gray-900 pb-6">
+        <div>
+            <h1 class="text-4xl font-black tracking-tighter text-white italic">ROMA<span class="text-blue-600 font-normal">.DATABASE</span></h1>
+            <p class="text-[10px] text-gray-600 mt-1 uppercase tracking-widest">Secure encrypted report system v3.0</p>
+        </div>
+        <button onclick="accessAdmin()" class="group flex items-center gap-2 text-gray-700 hover:text-blue-500 transition">
+            <span class="text-[10px] font-bold">CORE ACCESS</span>
+            <div class="p-2 border border-gray-800 rounded group-hover:border-blue-500"><i class="fas fa-fingerprint"></i></div>
         </button>
     </div>
 
-    <div id="userPanel" class="max-w-2xl mx-auto glass p-8 shadow-2xl">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <i class="fas fa-bug text-red-500"></i> Kirim Laporan / Bug
-        </h2>
-        <form id="reportForm" class="space-y-4">
-            <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Nama / WhatsApp</label>
-                <input type="text" id="user" class="w-full p-3 rounded mt-1 outline-none" placeholder="Contoh: Roma / 628..." required>
-            </div>
-            <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Tipe Masalah</label>
-                <select id="type" class="w-full p-3 rounded mt-1 outline-none">
-                    <option>Bug Database</option>
-                    <option>Saran Fitur</option>
-                    <option>Laporan User</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Deskripsi</label>
-                <textarea id="msg" class="w-full p-3 rounded mt-1 outline-none h-32" placeholder="Detail laporan..." required></textarea>
-            </div>
-            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded font-black transition">
-                KIRIM SEKARANG
-            </button>
-        </form>
+    <div id="userUI" class="max-w-xl mx-auto space-y-6">
+        <div class="neon-box p-8 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+            <h2 class="text-xl font-bold mb-6 text-white uppercase italic">Input Report Ticket</h2>
+            
+            <form id="reportForm" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Identity</label>
+                        <input type="text" id="userInput" placeholder="NAME / WA" class="w-full p-3 rounded-lg outline-none mt-1" required>
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Classification</label>
+                        <select id="typeInput" class="w-full p-3 rounded-lg outline-none mt-1">
+                            <option value="BUG">🐛 CRITICAL BUG</option>
+                            <option value="SARAN">💡 SUGGESTION</option>
+                            <option value="FRAUD">🚫 REPORT USER</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase">Message Detail</label>
+                    <textarea id="msgInput" class="w-full p-3 rounded-lg outline-none mt-1 h-32 resize-none" placeholder="Explain the situation..." required></textarea>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full py-4 bg-blue-700 hover:bg-blue-600 text-white font-black rounded-xl transition transform active:scale-95 flex items-center justify-center gap-3">
+                    EXECUTE REPORT <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            <p id="cooldownMsg" class="text-center text-red-500 text-[10px] mt-4 hidden font-bold italic"></p>
+        </div>
     </div>
 
-    <div id="adminPanel" class="max-w-5xl mx-auto admin-only">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-green-500 italic"><i class="fas fa-database mr-2"></i>DATA LAPORAN MASUK</h2>
-            <button onclick="closeAdmin()" class="text-red-500 font-bold">KELUAR</button>
+    <div id="adminUI" class="max-w-7xl mx-auto admin-panel animate-fade-in">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <h2 class="text-2xl font-black text-blue-500 italic uppercase">Central Intelligence Database</h2>
+            <div class="flex gap-2">
+                <input type="text" id="searchBar" onkeyup="filterTable()" placeholder="SEARCH USER..." class="p-2 px-4 rounded-full text-xs w-64">
+                <button onclick="exitAdmin()" class="bg-red-900/30 text-red-500 p-2 px-4 rounded-full text-xs font-bold hover:bg-red-500 hover:text-white transition">LOGOUT</button>
+            </div>
         </div>
 
-        <div class="glass overflow-hidden">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-blue-900/20 text-blue-400">
-                    <tr>
-                        <th class="p-4">WAKTU</th>
-                        <th class="p-4">PENGIRIM</th>
-                        <th class="p-4">TIPE</th>
-                        <th class="p-4">PESAN</th>
-                        <th class="p-4 text-center">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody id="reportList">
-                    </tbody>
-            </table>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="neon-box p-4 rounded-xl text-center">
+                <p class="text-[10px] text-gray-500 uppercase">Total Reports</p>
+                <h4 id="statTotal" class="text-2xl font-black text-white">0</h4>
+            </div>
+            <div class="neon-box p-4 rounded-xl text-center border-b-2 border-red-900">
+                <p class="text-[10px] text-gray-500 uppercase">Bugs Found</p>
+                <h4 id="statBug" class="text-2xl font-black text-red-500">0</h4>
+            </div>
+            <div class="neon-box p-4 rounded-xl text-center border-b-2 border-green-900">
+                <p class="text-[10px] text-gray-500 uppercase">Suggestions</p>
+                <h4 id="statSaran" class="text-2xl font-black text-green-500">0</h4>
+            </div>
+            <div class="neon-box p-4 rounded-xl text-center">
+                <button onclick="exportData()" class="h-full w-full flex items-center justify-center text-blue-500 hover:text-white transition gap-2">
+                    <i class="fas fa-download"></i> <span class="text-[10px] font-bold">EXPORT DATA</span>
+                </button>
+            </div>
         </div>
-        <button onclick="clearData()" class="mt-4 text-xs text-gray-600 hover:text-red-500">Hapus Semua Data Laporan</button>
+
+        <div class="neon-box rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-blue-600 text-white uppercase font-black">
+                        <tr>
+                            <th class="p-4">Timestamp</th>
+                            <th class="p-4">User</th>
+                            <th class="p-4">Class</th>
+                            <th class="p-4">Message</th>
+                            <th class="p-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="masterTable">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- LOGIC DATABASE (Lokal di Browser) ---
-        let db = JSON.parse(localStorage.getItem('romaReports')) || [];
+        let reports = JSON.parse(localStorage.getItem('roma_master_db')) || [];
+        let cooldown = false;
 
-        // Simpan Laporan (User)
+        // --- USER LOGIC ---
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const newReport = {
-                id: Date.now(),
-                time: new Date().toLocaleString(),
-                user: document.getElementById('user').value,
-                type: document.getElementById('type').value,
-                msg: document.getElementById('msg').value
+            if (cooldown) return;
+
+            const newEntry = {
+                id: 'TR-' + Date.now(),
+                time: new Date().toLocaleString('id-ID'),
+                user: document.getElementById('userInput').value,
+                type: document.getElementById('typeInput').value,
+                msg: document.getElementById('msgInput').value
             };
-            db.push(newReport);
-            localStorage.setItem('romaReports', JSON.stringify(db));
-            alert('✅ Laporan terkirim ke database Roma!');
+
+            reports.push(newEntry);
+            localStorage.setItem('roma_master_db', JSON.stringify(reports));
+            
+            // Trigger Cooldown 5 Menit
+            activateCooldown();
+            
+            alert('🚀 REPORT TRANSMITTED SUCCESSFULLY!');
             this.reset();
         });
 
-        // Buka Panel Admin dengan Password
-        function openAdmin() {
-            const pass = prompt("MASUKKAN PASSWORD OWNER:");
-            if (pass === "piala100") {
-                document.getElementById('userPanel').classList.add('hidden');
-                document.getElementById('adminPanel').classList.remove('admin-only');
-                renderReports();
-            } else {
-                alert("❌ PASSWORD SALAH, TOLOL!");
-            }
-        }
-
-        // Tutup Panel
-        function closeAdmin() {
-            document.getElementById('adminPanel').classList.add('admin-only');
-            document.getElementById('userPanel').classList.remove('hidden');
-        }
-
-        // Tampilkan Data ke Tabel
-        function renderReports() {
-            const list = document.getElementById('reportList');
-            list.innerHTML = '';
+        function activateCooldown() {
+            cooldown = true;
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('cooldownMsg');
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            msg.classList.remove('hidden');
             
-            if (db.length === 0) {
-                list.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-600">Belum ada laporan masuk.</td></tr>';
-                return;
-            }
+            let timeLeft = 300; // 5 menit
+            const timer = setInterval(() => {
+                timeLeft--;
+                msg.innerText = `SECURITY COOLDOWN: PLEASE WAIT ${timeLeft}s TO SEND ANOTHER REPORT`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    cooldown = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    msg.classList.add('hidden');
+                }
+            }, 1000);
+        }
 
-            db.reverse().forEach((item, index) => {
-                list.innerHTML += `
-                    <tr class="border-t border-gray-800 hover:bg-white/5 transition">
-                        <td class="p-4 text-gray-500 text-[10px]">${item.time}</td>
-                        <td class="p-4 font-bold text-blue-400">${item.user}</td>
-                        <td class="p-4"><span class="bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-[10px] uppercase">${item.type}</span></td>
-                        <td class="p-4 text-gray-300">${item.msg}</td>
+        // --- ADMIN LOGIC ---
+        function accessAdmin() {
+            const auth = prompt("ENTER OWNER ENCRYPTION KEY:");
+            if (auth === "piala100") {
+                document.getElementById('userUI').classList.add('hidden');
+                document.getElementById('adminUI').classList.remove('admin-only');
+                refreshTable();
+            } else {
+                alert("🚫 SYSTEM ERROR: UNAUTHORIZED ACCESS!");
+            }
+        }
+
+        function exitAdmin() {
+            document.getElementById('adminUI').classList.add('admin-only');
+            document.getElementById('userUI').classList.remove('hidden');
+        }
+
+        function refreshTable() {
+            const tbody = document.getElementById('masterTable');
+            tbody.innerHTML = '';
+            
+            // Update Stats
+            document.getElementById('statTotal').innerText = reports.length;
+            document.getElementById('statBug').innerText = reports.filter(r => r.type === 'BUG').length;
+            document.getElementById('statSaran').innerText = reports.filter(r => r.type === 'SARAN').length;
+
+            reports.slice().reverse().forEach((r) => {
+                const badgeClass = r.type === 'BUG' ? 'badge-bug' : (r.type === 'SARAN' ? 'badge-saran' : 'bg-gray-800 text-gray-400');
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-900 hover:bg-blue-600/5 transition">
+                        <td class="p-4 text-gray-600 font-bold">${r.time}</td>
+                        <td class="p-4 text-blue-400 font-black">${r.user.toUpperCase()}</td>
+                        <td class="p-4"><span class="${badgeClass} px-3 py-1 rounded-full font-black text-[9px]">${r.type}</span></td>
+                        <td class="p-4 text-gray-300 max-w-xs truncate">${r.msg}</td>
                         <td class="p-4 text-center">
-                            <button onclick="deleteSingle(${item.id})" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                            <button onclick="deleteEntry('${r.id}')" class="text-red-900 hover:text-red-500 transition"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        // Hapus satu per satu
-        function deleteSingle(id) {
-            if(confirm('Hapus laporan ini?')) {
-                db = db.filter(item => item.id !== id);
-                localStorage.setItem('romaReports', JSON.stringify(db));
-                renderReports();
+        function deleteEntry(id) {
+            if (confirm('DESTROY THIS DATA PERMANENTLY?')) {
+                reports = reports.filter(r => r.id !== id);
+                localStorage.setItem('roma_master_db', JSON.stringify(reports));
+                refreshTable();
             }
         }
 
-        // Hapus Semua
-        function clearData() {
-            if(confirm('HAPUS SEMUA DATABASE?')) {
-                localStorage.removeItem('romaReports');
-                db = [];
-                renderReports();
+        function filterTable() {
+            const input = document.getElementById('searchBar').value.toUpperCase();
+            const rows = document.getElementById('masterTable').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                let txt = rows[i].textContent || rows[i].innerText;
+                rows[i].style.display = txt.toUpperCase().indexOf(input) > -1 ? "" : "none";
             }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reports, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "roma_master_reports.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
         }
     </script>
 </body>
