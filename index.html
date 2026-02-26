@@ -3,151 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMA SUPPORT SYSTEM</title>
+    <title>ROMA SUPPORT SYSTEM V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f0f0f; color: #eee; font-family: sans-serif; }
-        .glass { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; }
+        body { background: #0a0a0a; color: #eee; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: #151515; border: 1px solid #222; border-radius: 12px; transition: 0.3s; }
+        .glass:hover { border-color: #3b82f6; }
         .admin-only { display: none; }
-        input, textarea, select { background: #000 !important; color: white !important; border: 1px solid #444 !important; }
+        input, textarea, select { background: #000 !important; color: white !important; border: 1px solid #333 !important; }
+        input:focus { border-color: #3b82f6 !important; outline: none; }
+        .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10">
 
-    <div class="max-w-4xl mx-auto flex justify-between items-center mb-10 mt-5">
-        <h1 class="text-2xl font-black italic text-blue-500">ROMA <span class="text-white">SUPPORT</span></h1>
-        <button onclick="openAdmin()" class="bg-gray-800 p-2 px-4 rounded text-xs hover:bg-gray-700 transition">
-            <i class="fas fa-lock mr-2"></i>ADMIN PANEL
+    <div class="max-w-6xl mx-auto flex justify-between items-center mb-10">
+        <div>
+            <h1 class="text-3xl font-black italic text-blue-500 tracking-tighter">ROMA <span class="text-white">OPS</span></h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest">MM2 Database & Bot Support</p>
+        </div>
+        <button onclick="openAdmin()" class="bg-blue-600/10 text-blue-500 border border-blue-600/20 p-2 px-4 rounded-lg text-xs hover:bg-blue-600 hover:text-white transition font-bold">
+            <i class="fas fa-terminal mr-2"></i>OWNER LOGIN
         </button>
     </div>
 
-    <div id="userPanel" class="max-w-2xl mx-auto glass p-8 shadow-2xl">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <i class="fas fa-bug text-red-500"></i> Kirim Laporan / Bug
+    <div id="userPanel" class="max-w-2xl mx-auto glass p-8 shadow-2xl border-t-4 border-t-blue-600">
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2 italic">
+            <i class="fas fa-paper-plane text-blue-500"></i> TRANSMIT REPORT
         </h2>
         <form id="reportForm" class="space-y-4">
-            <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Nama / WhatsApp</label>
-                <input type="text" id="user" class="w-full p-3 rounded mt-1 outline-none" placeholder="Contoh: Roma / 628..." required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">Nama / WA (Opsional)</label>
+                    <input type="text" id="user" class="w-full p-3 rounded mt-1 outline-none" placeholder="Anonymous">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">Kategori Laporan</label>
+                    <select id="type" class="w-full p-3 rounded mt-1 outline-none">
+                        <option value="BUG BOT">🐛 Bug / Error Bot</option>
+                        <option value="VALUE MISC">💰 Salah Value Item</option>
+                        <option value="SCAMMER">🚫 Lapor Scammer/User</option>
+                        <option value="SUGGEST">💡 Saran Fitur Baru</option>
+                        <option value="DATABASE">📂 Database Error</option>
+                        <option value="OTHER">❓ Lainnya</option>
+                    </select>
+                </div>
             </div>
+
             <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Tipe Masalah</label>
-                <select id="type" class="w-full p-3 rounded mt-1 outline-none">
-                    <option>Bug Database</option>
-                    <option>Saran Fitur</option>
-                    <option>Laporan User</option>
-                </select>
+                <label class="text-[10px] text-gray-500 uppercase font-bold">Item Terkait (Jika ada)</label>
+                <input type="text" id="itemName" class="w-full p-3 rounded mt-1 outline-none" placeholder="Contoh: .nikilas / .corrupt">
             </div>
+
             <div>
-                <label class="text-xs text-gray-500 uppercase font-bold">Deskripsi</label>
-                <textarea id="msg" class="w-full p-3 rounded mt-1 outline-none h-32" placeholder="Detail laporan..." required></textarea>
+                <label class="text-[10px] text-gray-500 uppercase font-bold">Detail Laporan</label>
+                <textarea id="msg" class="w-full p-3 rounded mt-1 outline-none h-32 resize-none" placeholder="Jelaskan secara singkat dan jelas..." required></textarea>
             </div>
-            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded font-black transition">
-                KIRIM SEKARANG
+
+            <button type="submit" id="submitBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-black transition-all shadow-lg shadow-blue-600/20 uppercase tracking-widest text-sm">
+                Submit Ticket
             </button>
         </form>
     </div>
 
-    <div id="adminPanel" class="max-w-5xl mx-auto admin-only">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-green-500 italic"><i class="fas fa-database mr-2"></i>DATA LAPORAN MASUK</h2>
-            <button onclick="closeAdmin()" class="text-red-500 font-bold">KELUAR</button>
+    <div id="adminPanel" class="max-w-full mx-auto admin-only">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-green-500 italic uppercase tracking-tighter">Database Management</h2>
+                <p class="text-xs text-gray-500">Melihat semua pesan masuk dari user</p>
+            </div>
+            <button onclick="closeAdmin()" class="bg-red-500 text-white p-2 px-6 rounded-full text-xs font-bold hover:bg-red-600 transition">LOGOUT</button>
         </div>
 
-        <div class="glass overflow-hidden">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-blue-900/20 text-blue-400">
-                    <tr>
-                        <th class="p-4">WAKTU</th>
-                        <th class="p-4">PENGIRIM</th>
-                        <th class="p-4">TIPE</th>
-                        <th class="p-4">PESAN</th>
-                        <th class="p-4 text-center">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody id="reportList">
-                    </tbody>
-            </table>
+        <div class="glass overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-white/5 text-gray-400 uppercase">
+                        <tr>
+                            <th class="p-4">Time</th>
+                            <th class="p-4">User</th>
+                            <th class="p-4">Category</th>
+                            <th class="p-4">Weapon/Item</th>
+                            <th class="p-4">Message</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportList">
+                        </tbody>
+                </table>
+            </div>
         </div>
-        <button onclick="clearData()" class="mt-4 text-xs text-gray-600 hover:text-red-500">Hapus Semua Data Laporan</button>
+        <div class="flex justify-between items-center mt-6">
+            <p id="countData" class="text-[10px] text-gray-500 uppercase font-bold"></p>
+            <button onclick="clearData()" class="text-[10px] text-gray-700 hover:text-red-500 font-bold uppercase tracking-widest border border-gray-800 p-2 rounded">
+                <i class="fas fa-skull-crossbones mr-2"></i>Wipe All Data
+            </button>
+        </div>
     </div>
 
     <script>
-        // --- LOGIC DATABASE (Lokal di Browser) ---
         let db = JSON.parse(localStorage.getItem('romaReports')) || [];
 
-        // Simpan Laporan (User)
+        // Save Report
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
             const newReport = {
                 id: Date.now(),
-                time: new Date().toLocaleString(),
-                user: document.getElementById('user').value,
+                time: new Date().toLocaleString('id-ID'),
+                user: document.getElementById('user').value || 'Anonymous',
                 type: document.getElementById('type').value,
+                item: document.getElementById('itemName').value || '-',
                 msg: document.getElementById('msg').value
             };
+
             db.push(newReport);
             localStorage.setItem('romaReports', JSON.stringify(db));
-            alert('✅ Laporan terkirim ke database Roma!');
-            this.reset();
+            
+            // Effect Sukses
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "SENT SUCCESSFULLY!";
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            
+            setTimeout(() => {
+                alert('✅ Laporan telah disimpan di Database Admin Roma!');
+                btn.innerText = "SUBMIT TICKET";
+                btn.classList.replace('bg-green-600', 'bg-blue-600');
+                this.reset();
+            }, 500);
         });
 
-        // Buka Panel Admin dengan Password
+        // Admin Access
         function openAdmin() {
-            const pass = prompt("MASUKKAN PASSWORD OWNER:");
+            const pass = prompt("IDENTIFICATION REQUIRED:");
             if (pass === "piala100") {
                 document.getElementById('userPanel').classList.add('hidden');
                 document.getElementById('adminPanel').classList.remove('admin-only');
                 renderReports();
             } else {
-                alert("❌ PASSWORD SALAH, TOLOL!");
+                alert("❌ ACCESS DENIED: WRONG PASSWORD!");
             }
         }
 
-        // Tutup Panel
         function closeAdmin() {
             document.getElementById('adminPanel').classList.add('admin-only');
             document.getElementById('userPanel').classList.remove('hidden');
         }
 
-        // Tampilkan Data ke Tabel
         function renderReports() {
             const list = document.getElementById('reportList');
+            const count = document.getElementById('countData');
             list.innerHTML = '';
+            count.innerText = `Total Laporan: ${db.length}`;
             
             if (db.length === 0) {
-                list.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-600">Belum ada laporan masuk.</td></tr>';
+                list.innerHTML = '<tr><td colspan="6" class="p-20 text-center text-gray-700 italic">No incoming transmissions found.</td></tr>';
                 return;
             }
 
-            db.reverse().forEach((item, index) => {
+            db.slice().reverse().forEach((item) => {
+                // Warna Badge Kategori
+                let badgeColor = "bg-gray-800 text-gray-400";
+                if(item.type === "BUG BOT") badgeColor = "bg-red-900/40 text-red-400";
+                if(item.type === "VALUE MISC") badgeColor = "bg-yellow-900/40 text-yellow-400";
+                if(item.type === "SUGGEST") badgeColor = "bg-green-900/40 text-green-400";
+                if(item.type === "SCAMMER") badgeColor = "bg-purple-900/40 text-purple-400";
+
                 list.innerHTML += `
-                    <tr class="border-t border-gray-800 hover:bg-white/5 transition">
-                        <td class="p-4 text-gray-500 text-[10px]">${item.time}</td>
-                        <td class="p-4 font-bold text-blue-400">${item.user}</td>
-                        <td class="p-4"><span class="bg-blue-900/40 text-blue-300 px-2 py-1 rounded text-[10px] uppercase">${item.type}</span></td>
-                        <td class="p-4 text-gray-300">${item.msg}</td>
+                    <tr class="border-t border-white/5 hover:bg-white/5 transition">
+                        <td class="p-4 text-gray-600 font-mono">${item.time}</td>
+                        <td class="p-4 font-bold ${item.user === 'Anonymous' ? 'text-gray-500' : 'text-blue-400'}">${item.user}</td>
+                        <td class="p-4"><span class="badge ${badgeColor}">${item.type}</span></td>
+                        <td class="p-4 font-bold text-white">${item.item}</td>
+                        <td class="p-4 text-gray-400 max-w-xs break-words">${item.msg}</td>
                         <td class="p-4 text-center">
-                            <button onclick="deleteSingle(${item.id})" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                            <button onclick="deleteSingle(${item.id})" class="text-gray-600 hover:text-red-500 transition"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        // Hapus satu per satu
         function deleteSingle(id) {
-            if(confirm('Hapus laporan ini?')) {
+            if(confirm('Delete this entry?')) {
                 db = db.filter(item => item.id !== id);
                 localStorage.setItem('romaReports', JSON.stringify(db));
                 renderReports();
             }
         }
 
-        // Hapus Semua
         function clearData() {
-            if(confirm('HAPUS SEMUA DATABASE?')) {
+            if(confirm('WARNING: PERMANENTLY WIPE ALL DATABASE?')) {
                 localStorage.removeItem('romaReports');
                 db = [];
                 renderReports();
