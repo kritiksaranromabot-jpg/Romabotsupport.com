@@ -1,205 +1,197 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMA SUPPORT SYSTEM V3</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background: #0a0a0a; color: #eee; font-family: 'Segoe UI', sans-serif; }
-        .glass { background: #151515; border: 1px solid #222; border-radius: 12px; transition: 0.3s; }
-        .glass:hover { border-color: #3b82f6; }
-        .admin-only { display: none; }
-        input, textarea, select { background: #000 !important; color: white !important; border: 1px solid #333 !important; }
-        input:focus { border-color: #3b82f6 !important; outline: none; }
-        .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MM2BotValueCek - Report System</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:600px;
+    margin:80px auto;
+    background:#1e293b;
+    padding:25px;
+    border-radius:12px;
+}
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:6px;
+}
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.sendBtn{
+    background:#22c55e;
+}
+.adminLogo{
+    position:fixed;
+    top:15px;
+    right:15px;
+    width:40px;
+    cursor:pointer;
+}
+.adminPanel{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#000000ee;
+    overflow:auto;
+    padding:30px;
+}
+.card{
+    background:#1e293b;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:8px;
+}
+.deleteBtn{
+    background:#ef4444;
+    margin-top:10px;
+}
+.closeBtn{
+    background:#64748b;
+    margin-bottom:20px;
+}
+.counter{
+    font-size:14px;
+    opacity:0.7;
+}
+</style>
 </head>
-<body class="p-4 md:p-10">
+<body>
 
-    <div class="max-w-6xl mx-auto flex justify-between items-center mb-10">
-        <div>
-            <h1 class="text-3xl font-black italic text-blue-500 tracking-tighter">ROMA <span class="text-white">OPS</span></h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest">MM2 Database & Bot Support</p>
-        </div>
-        <button onclick="openAdmin()" class="bg-blue-600/10 text-blue-500 border border-blue-600/20 p-2 px-4 rounded-lg text-xs hover:bg-blue-600 hover:text-white transition font-bold">
-            <i class="fas fa-terminal mr-2"></i>OWNER LOGIN
-        </button>
-    </div>
+<img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" class="adminLogo" onclick="openAdmin()">
 
-    <div id="userPanel" class="max-w-2xl mx-auto glass p-8 shadow-2xl border-t-4 border-t-blue-600">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2 italic">
-            <i class="fas fa-paper-plane text-blue-500"></i> TRANSMIT REPORT
-        </h2>
-        <form id="reportForm" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase font-bold">Nama / WA (Opsional)</label>
-                    <input type="text" id="user" class="w-full p-3 rounded mt-1 outline-none" placeholder="Anonymous">
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase font-bold">Kategori Laporan</label>
-                    <select id="type" class="w-full p-3 rounded mt-1 outline-none">
-                        <option value="BUG BOT">🐛 Bug / Error Bot</option>
-                        <option value="VALUE MISC">💰 Salah Value Item</option>
-                        <option value="SCAMMER">🚫 Lapor Scammer/User</option>
-                        <option value="SUGGEST">💡 Saran Fitur Baru</option>
-                        <option value="DATABASE">📂 Database Error</option>
-                        <option value="OTHER">❓ Lainnya</option>
-                    </select>
-                </div>
+<div class="container">
+<h2>MM2BotValueCek Report</h2>
+<p class="counter" id="reportCount"></p>
+
+<label>Nama Pengirim</label>
+<input type="text" id="nama">
+
+<label>Tipe Laporan</label>
+<select id="tipe">
+<option value="Kritik">Kritik</option>
+<option value="Saran">Saran</option>
+<option value="Bug/Error">Bug/Error</option>
+</select>
+
+<label>Isi Laporan</label>
+<textarea id="isi" rows="5"></textarea>
+
+<button class="sendBtn" onclick="kirim()">Kirim Laporan</button>
+</div>
+
+<div class="adminPanel" id="adminPanel">
+<button class="closeBtn" onclick="closeAdmin()">Tutup</button>
+<h2>Dashboard Admin</h2>
+<div id="adminContent"></div>
+</div>
+
+<script>
+
+function updateCounter(){
+    let data = JSON.parse(localStorage.getItem("laporan")) || [];
+    document.getElementById("reportCount").innerText =
+        "Total laporan masuk: " + data.length;
+}
+
+function kirim(){
+    let nama = document.getElementById("nama").value.trim();
+    let tipe = document.getElementById("tipe").value;
+    let isi = document.getElementById("isi").value.trim();
+
+    if(nama === "" || isi === ""){
+        alert("Nama dan isi laporan tidak boleh kosong.");
+        return;
+    }
+
+    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
+
+    laporan.push({
+        id: Date.now(),
+        nama: nama,
+        tipe: tipe,
+        isi: isi,
+        waktu: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("laporan", JSON.stringify(laporan));
+
+    alert("Laporan berhasil dikirim.");
+    document.getElementById("nama").value="";
+    document.getElementById("isi").value="";
+    updateCounter();
+}
+
+function openAdmin(){
+    let pwd = prompt("Masukkan password admin:");
+    if(pwd !== "piala100"){
+        alert("Password salah.");
+        return;
+    }
+
+    document.getElementById("adminPanel").style.display="block";
+    tampilkanData();
+}
+
+function closeAdmin(){
+    document.getElementById("adminPanel").style.display="none";
+}
+
+function tampilkanData(){
+    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
+    let html = "";
+
+    if(laporan.length === 0){
+        html = "<p>Tidak ada laporan.</p>";
+    }else{
+        laporan.reverse().forEach((item,index)=>{
+            html += `
+            <div class="card">
+                <b>ID:</b> ${item.id}<br>
+                <b>Nama:</b> ${item.nama}<br>
+                <b>Tipe:</b> ${item.tipe}<br>
+                <b>Waktu:</b> ${item.waktu}<br>
+                <b>Isi:</b><br>${item.isi}
+                <button class="deleteBtn" onclick="hapus(${item.id})">Hapus</button>
             </div>
-
-            <div>
-                <label class="text-[10px] text-gray-500 uppercase font-bold">Item Terkait (Jika ada)</label>
-                <input type="text" id="itemName" class="w-full p-3 rounded mt-1 outline-none" placeholder="Contoh: .nikilas / .corrupt">
-            </div>
-
-            <div>
-                <label class="text-[10px] text-gray-500 uppercase font-bold">Detail Laporan</label>
-                <textarea id="msg" class="w-full p-3 rounded mt-1 outline-none h-32 resize-none" placeholder="Jelaskan secara singkat dan jelas..." required></textarea>
-            </div>
-
-            <button type="submit" id="submitBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-black transition-all shadow-lg shadow-blue-600/20 uppercase tracking-widest text-sm">
-                Submit Ticket
-            </button>
-        </form>
-    </div>
-
-    <div id="adminPanel" class="max-w-full mx-auto admin-only">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h2 class="text-2xl font-black text-green-500 italic uppercase tracking-tighter">Database Management</h2>
-                <p class="text-xs text-gray-500">Melihat semua pesan masuk dari user</p>
-            </div>
-            <button onclick="closeAdmin()" class="bg-red-500 text-white p-2 px-6 rounded-full text-xs font-bold hover:bg-red-600 transition">LOGOUT</button>
-        </div>
-
-        <div class="glass overflow-hidden shadow-2xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-white/5 text-gray-400 uppercase">
-                        <tr>
-                            <th class="p-4">Time</th>
-                            <th class="p-4">User</th>
-                            <th class="p-4">Category</th>
-                            <th class="p-4">Weapon/Item</th>
-                            <th class="p-4">Message</th>
-                            <th class="p-4 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportList">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="flex justify-between items-center mt-6">
-            <p id="countData" class="text-[10px] text-gray-500 uppercase font-bold"></p>
-            <button onclick="clearData()" class="text-[10px] text-gray-700 hover:text-red-500 font-bold uppercase tracking-widest border border-gray-800 p-2 rounded">
-                <i class="fas fa-skull-crossbones mr-2"></i>Wipe All Data
-            </button>
-        </div>
-    </div>
-
-    <script>
-        let db = JSON.parse(localStorage.getItem('romaReports')) || [];
-
-        // Save Report
-        document.getElementById('reportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const newReport = {
-                id: Date.now(),
-                time: new Date().toLocaleString('id-ID'),
-                user: document.getElementById('user').value || 'Anonymous',
-                type: document.getElementById('type').value,
-                item: document.getElementById('itemName').value || '-',
-                msg: document.getElementById('msg').value
-            };
-
-            db.push(newReport);
-            localStorage.setItem('romaReports', JSON.stringify(db));
-            
-            // Effect Sukses
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "SENT SUCCESSFULLY!";
-            btn.classList.replace('bg-blue-600', 'bg-green-600');
-            
-            setTimeout(() => {
-                alert('✅ Laporan telah disimpan di Database Admin Roma!');
-                btn.innerText = "SUBMIT TICKET";
-                btn.classList.replace('bg-green-600', 'bg-blue-600');
-                this.reset();
-            }, 500);
+            `;
         });
+    }
 
-        // Admin Access
-        function openAdmin() {
-            const pass = prompt("IDENTIFICATION REQUIRED:");
-            if (pass === "piala100") {
-                document.getElementById('userPanel').classList.add('hidden');
-                document.getElementById('adminPanel').classList.remove('admin-only');
-                renderReports();
-            } else {
-                alert("❌ ACCESS DENIED: WRONG PASSWORD!");
-            }
-        }
+    document.getElementById("adminContent").innerHTML = html;
+}
 
-        function closeAdmin() {
-            document.getElementById('adminPanel').classList.add('admin-only');
-            document.getElementById('userPanel').classList.remove('hidden');
-        }
+function hapus(id){
+    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
+    laporan = laporan.filter(item => item.id !== id);
+    localStorage.setItem("laporan", JSON.stringify(laporan));
+    tampilkanData();
+    updateCounter();
+}
 
-        function renderReports() {
-            const list = document.getElementById('reportList');
-            const count = document.getElementById('countData');
-            list.innerHTML = '';
-            count.innerText = `Total Laporan: ${db.length}`;
-            
-            if (db.length === 0) {
-                list.innerHTML = '<tr><td colspan="6" class="p-20 text-center text-gray-700 italic">No incoming transmissions found.</td></tr>';
-                return;
-            }
+updateCounter();
 
-            db.slice().reverse().forEach((item) => {
-                // Warna Badge Kategori
-                let badgeColor = "bg-gray-800 text-gray-400";
-                if(item.type === "BUG BOT") badgeColor = "bg-red-900/40 text-red-400";
-                if(item.type === "VALUE MISC") badgeColor = "bg-yellow-900/40 text-yellow-400";
-                if(item.type === "SUGGEST") badgeColor = "bg-green-900/40 text-green-400";
-                if(item.type === "SCAMMER") badgeColor = "bg-purple-900/40 text-purple-400";
+</script>
 
-                list.innerHTML += `
-                    <tr class="border-t border-white/5 hover:bg-white/5 transition">
-                        <td class="p-4 text-gray-600 font-mono">${item.time}</td>
-                        <td class="p-4 font-bold ${item.user === 'Anonymous' ? 'text-gray-500' : 'text-blue-400'}">${item.user}</td>
-                        <td class="p-4"><span class="badge ${badgeColor}">${item.type}</span></td>
-                        <td class="p-4 font-bold text-white">${item.item}</td>
-                        <td class="p-4 text-gray-400 max-w-xs break-words">${item.msg}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="deleteSingle(${item.id})" class="text-gray-600 hover:text-red-500 transition"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function deleteSingle(id) {
-            if(confirm('Delete this entry?')) {
-                db = db.filter(item => item.id !== id);
-                localStorage.setItem('romaReports', JSON.stringify(db));
-                renderReports();
-            }
-        }
-
-        function clearData() {
-            if(confirm('WARNING: PERMANENTLY WIPE ALL DATABASE?')) {
-                localStorage.removeItem('romaReports');
-                db = [];
-                renderReports();
-            }
-        }
-    </script>
 </body>
 </html>
