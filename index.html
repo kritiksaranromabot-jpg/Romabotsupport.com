@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MM2BotValueCek - Report System</title>
+<title>MM2BotValueCek Pro Report</title>
 
 <style>
 body{
-    font-family: Arial, sans-serif;
+    margin:0;
+    font-family:Arial;
     background:#0f172a;
     color:white;
-    margin:0;
-    padding:0;
 }
 .container{
     max-width:600px;
@@ -20,7 +19,7 @@ body{
     padding:25px;
     border-radius:12px;
 }
-input, textarea, select{
+input,select,textarea{
     width:100%;
     padding:10px;
     margin-top:8px;
@@ -29,32 +28,26 @@ input, textarea, select{
     border-radius:6px;
 }
 button{
-    padding:10px 20px;
+    padding:10px 15px;
     border:none;
     border-radius:6px;
-    cursor:pointer;
     font-weight:bold;
+    cursor:pointer;
 }
-.sendBtn{
-    background:#22c55e;
-}
-.adminLogo{
+.sendBtn{background:#22c55e;}
+.adminBtn{
     position:fixed;
     top:15px;
     right:15px;
-    width:40px;
-    cursor:pointer;
+    background:#6366f1;
 }
-.adminPanel{
+.modal{
     display:none;
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#000000ee;
+    inset:0;
+    background:#000000dd;
     overflow:auto;
-    padding:30px;
+    padding:40px;
 }
 .card{
     background:#1e293b;
@@ -62,135 +55,143 @@ button{
     margin-bottom:15px;
     border-radius:8px;
 }
-.deleteBtn{
-    background:#ef4444;
-    margin-top:10px;
-}
-.closeBtn{
-    background:#64748b;
-    margin-bottom:20px;
-}
-.counter{
-    font-size:14px;
-    opacity:0.7;
-}
+.deleteBtn{background:#ef4444;margin-top:10px;}
+.stats{opacity:0.7;font-size:14px;}
 </style>
 </head>
 <body>
 
-<img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" class="adminLogo" onclick="openAdmin()">
+<button class="adminBtn" onclick="loginAdmin()">Admin</button>
 
 <div class="container">
-<h2>MM2BotValueCek Report</h2>
-<p class="counter" id="reportCount"></p>
+<h2>MM2BotValueCek Report System</h2>
+<p class="stats" id="totalCount">Loading...</p>
 
-<label>Nama Pengirim</label>
-<input type="text" id="nama">
-
-<label>Tipe Laporan</label>
+<input type="text" id="nama" placeholder="Nama Anda">
 <select id="tipe">
-<option value="Kritik">Kritik</option>
-<option value="Saran">Saran</option>
-<option value="Bug/Error">Bug/Error</option>
+<option>Kritik</option>
+<option>Saran</option>
+<option>Bug/Error</option>
 </select>
-
-<label>Isi Laporan</label>
-<textarea id="isi" rows="5"></textarea>
-
-<button class="sendBtn" onclick="kirim()">Kirim Laporan</button>
+<textarea id="isi" rows="4" placeholder="Minimal 20 karakter..."></textarea>
+<button class="sendBtn" onclick="kirim()">Kirim</button>
+<p id="notif"></p>
 </div>
 
-<div class="adminPanel" id="adminPanel">
-<button class="closeBtn" onclick="closeAdmin()">Tutup</button>
+<div class="modal" id="adminPanel">
 <h2>Dashboard Admin</h2>
-<div id="adminContent"></div>
+<input type="text" id="search" placeholder="Cari nama..." oninput="renderData()">
+<select id="filter" onchange="renderData()">
+<option value="">Semua</option>
+<option>Kritik</option>
+<option>Saran</option>
+<option>Bug/Error</option>
+</select>
+<div id="dataList"></div>
+<button onclick="closeAdmin()">Tutup</button>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-function updateCounter(){
-    let data = JSON.parse(localStorage.getItem("laporan")) || [];
-    document.getElementById("reportCount").innerText =
-        "Total laporan masuk: " + data.length;
+/* ================= CONFIG GANTI DENGAN PUNYA ANDA ================= */
+const firebaseConfig = {
+  apiKey: "ISI",
+  authDomain: "ISI",
+  projectId: "ISI",
+  storageBucket: "ISI",
+  messagingSenderId: "ISI",
+  appId: "ISI"
+};
+/* ================================================================ */
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let reports = [];
+let cooldown = false;
+
+function showNotif(msg,color="white"){
+    const n = document.getElementById("notif");
+    n.innerText = msg;
+    n.style.color = color;
 }
 
-function kirim(){
-    let nama = document.getElementById("nama").value.trim();
-    let tipe = document.getElementById("tipe").value;
-    let isi = document.getElementById("isi").value.trim();
-
-    if(nama === "" || isi === ""){
-        alert("Nama dan isi laporan tidak boleh kosong.");
+window.kirim = async function(){
+    if(cooldown){
+        showNotif("Tunggu 15 detik sebelum kirim lagi.","orange");
         return;
     }
 
-    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
+    const nama = document.getElementById("nama").value.trim();
+    const tipe = document.getElementById("tipe").value;
+    const isi = document.getElementById("isi").value.trim();
 
-    laporan.push({
-        id: Date.now(),
-        nama: nama,
-        tipe: tipe,
-        isi: isi,
-        waktu: new Date().toLocaleString()
+    if(!nama || isi.length < 20){
+        showNotif("Nama dan isi minimal 20 karakter.","red");
+        return;
+    }
+
+    await addDoc(collection(db,"laporan"),{
+        nama,tipe,isi,
+        waktu: new Date()
     });
 
-    localStorage.setItem("laporan", JSON.stringify(laporan));
-
-    alert("Laporan berhasil dikirim.");
-    document.getElementById("nama").value="";
+    showNotif("Laporan terkirim.","lightgreen");
     document.getElementById("isi").value="";
-    updateCounter();
+    cooldown = true;
+    setTimeout(()=>cooldown=false,15000);
 }
 
-function openAdmin(){
-    let pwd = prompt("Masukkan password admin:");
+onSnapshot(collection(db,"laporan"),(snapshot)=>{
+    reports = [];
+    snapshot.forEach(doc=>{
+        reports.push({id:doc.id,...doc.data()});
+    });
+    document.getElementById("totalCount").innerText =
+        "Total laporan: "+reports.length;
+    renderData();
+});
+
+window.loginAdmin = function(){
+    const pwd = prompt("Password:");
     if(pwd !== "piala100"){
-        alert("Password salah.");
+        alert("Salah.");
         return;
     }
-
     document.getElementById("adminPanel").style.display="block";
-    tampilkanData();
 }
 
-function closeAdmin(){
+window.closeAdmin = function(){
     document.getElementById("adminPanel").style.display="none";
 }
 
-function tampilkanData(){
-    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
-    let html = "";
+window.renderData = function(){
+    const search = document.getElementById("search").value.toLowerCase();
+    const filter = document.getElementById("filter").value;
+    let html="";
 
-    if(laporan.length === 0){
-        html = "<p>Tidak ada laporan.</p>";
-    }else{
-        laporan.reverse().forEach((item,index)=>{
-            html += `
-            <div class="card">
-                <b>ID:</b> ${item.id}<br>
-                <b>Nama:</b> ${item.nama}<br>
-                <b>Tipe:</b> ${item.tipe}<br>
-                <b>Waktu:</b> ${item.waktu}<br>
-                <b>Isi:</b><br>${item.isi}
-                <button class="deleteBtn" onclick="hapus(${item.id})">Hapus</button>
-            </div>
-            `;
-        });
-    }
+    reports
+    .filter(r=>r.nama.toLowerCase().includes(search))
+    .filter(r=>!filter || r.tipe===filter)
+    .sort((a,b)=>b.waktu.seconds-a.waktu.seconds)
+    .forEach(r=>{
+        html+=`
+        <div class="card">
+        <b>${r.nama}</b> (${r.tipe})<br>
+        ${new Date(r.waktu.seconds*1000).toLocaleString()}<br>
+        ${r.isi}
+        <button class="deleteBtn" onclick="hapus('${r.id}')">Hapus</button>
+        </div>`;
+    });
 
-    document.getElementById("adminContent").innerHTML = html;
+    document.getElementById("dataList").innerHTML=html;
 }
 
-function hapus(id){
-    let laporan = JSON.parse(localStorage.getItem("laporan")) || [];
-    laporan = laporan.filter(item => item.id !== id);
-    localStorage.setItem("laporan", JSON.stringify(laporan));
-    tampilkanData();
-    updateCounter();
+window.hapus = async function(id){
+    await deleteDoc(doc(db,"laporan",id));
 }
-
-updateCounter();
-
 </script>
 
 </body>
